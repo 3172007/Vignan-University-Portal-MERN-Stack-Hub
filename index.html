@@ -1,0 +1,2206 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vignan University - B.Tech Academic Hub, Study Timer, Calendar & MERN React Lab</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome 6 Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        vignan: {
+                            50: '#f0f4f8',
+                            100: '#d9e2ec',
+                            500: '#0f4c81', // Vignan Blue Accent
+                            600: '#003366', // Vignan Primary Navy
+                            700: '#002244',
+                            800: '#001830',
+                            gold: '#D4AF37',
+                            goldHover: '#B89628',
+                        },
+                        mern: {
+                            mongo: '#13AA52',
+                            express: '#68A063',
+                            react: '#61DAFB',
+                            node: '#339933'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .task-card, .book-card, .tool-card, .cal-card, .mern-card {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .task-card:hover, .book-card:hover, .tool-card:hover, .cal-card:hover, .mern-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 28px -6px rgba(0, 51, 102, 0.12), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+        }
+        .progress-bar-fill {
+            transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.05);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+        .vignan-gradient {
+            background: linear-gradient(135deg, #003366 0%, #0f4c81 60%, #1a365d 100%);
+        }
+        .vignan-hero-bg {
+            background: radial-gradient(circle at top right, #0f4c81 0%, #003366 50%, #001830 100%);
+        }
+        .nav-tab.active {
+            background-color: #003366;
+            color: #ffffff;
+            border-color: #003366;
+            box-shadow: 0 4px 12px rgba(0, 51, 102, 0.25);
+        }
+        .dark .nav-tab.active {
+            background-color: #0f4c81;
+            color: #ffffff;
+            border-color: #0f4c81;
+        }
+        .timer-circle {
+            transition: stroke-dashoffset 1s linear;
+        }
+        .code-block {
+            background-color: #0f172a;
+            color: #f8fafc;
+        }
+    </style>
+</head>
+<body class="min-h-full flex flex-col text-slate-800 bg-slate-100 dark:bg-slate-900 dark:text-slate-100 antialiased selection:bg-vignan-500 selection:text-white">
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Generic Custom Modal Overlay -->
+    <div id="customModalOverlay" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div id="customModalContent" class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 max-w-2xl w-full p-6 relative overflow-hidden transition-all transform scale-95 opacity-0 max-h-[90vh] overflow-y-auto">
+            <!-- Dynamic Content Injected via JavaScript -->
+        </div>
+    </div>
+
+    <!-- Student Login Modal Overlay -->
+    <div id="loginScreen" class="fixed inset-0 z-40 vignan-hero-bg flex items-center justify-center p-4 overflow-y-auto">
+        <div class="max-w-md w-full my-auto bg-white dark:bg-slate-800 rounded-3xl shadow-2xl overflow-hidden border border-white/20 transition-all">
+            
+            <!-- Login Header Banner -->
+            <div class="vignan-gradient p-6 text-center text-white relative border-b-4 border-amber-500">
+                <div class="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 mx-auto flex items-center justify-center text-amber-300 text-3xl shadow-inner mb-3">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <span class="text-[10px] uppercase font-bold tracking-widest text-amber-300 bg-amber-500/20 px-3 py-1 rounded-full border border-amber-400/30">
+                    VFSTR Student Portal
+                </span>
+                <h1 class="text-2xl font-black tracking-tight mt-2 text-white">Vignan University</h1>
+                <p class="text-xs text-slate-200 mt-1">B.Tech Academic Hub, Study Timer, Calendar & MERN Lab</p>
+            </div>
+
+            <!-- Login Form Body -->
+            <form id="loginForm" onsubmit="handleLoginSubmit(event)" class="p-6 space-y-4">
+                
+                <!-- Error Alert Box -->
+                <div id="loginErrorMsg" class="hidden p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-300 dark:border-rose-700 text-rose-700 dark:text-rose-300 text-xs font-semibold flex items-center gap-2">
+                    <i class="fa-solid fa-circle-exclamation text-rose-500 text-base shrink-0"></i>
+                    <span id="loginErrorText">Password must match your Registration Number!</span>
+                </div>
+
+                <!-- Student Name -->
+                <div>
+                    <label for="loginStudentName" class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                        Student Full Name <span class="text-rose-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                            <i class="fa-solid fa-user"></i>
+                        </span>
+                        <input type="text" id="loginStudentName" required placeholder="e.g., K. Sai Kumar" 
+                               class="w-full pl-10 pr-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-vignan-500">
+                    </div>
+                </div>
+
+                <!-- Registration Number -->
+                <div>
+                    <label for="loginRegNo" class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                        Registration Number (Reg No) <span class="text-rose-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                            <i class="fa-solid fa-id-card"></i>
+                        </span>
+                        <input type="text" id="loginRegNo" required placeholder="e.g., 211FA04000" 
+                               class="w-full pl-10 pr-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-sm font-semibold tracking-wide text-slate-900 dark:text-white uppercase placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-vignan-500">
+                    </div>
+                </div>
+
+                <!-- Password Input -->
+                <div>
+                    <label for="loginPassword" class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                        Password <span class="text-rose-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                            <i class="fa-solid fa-lock"></i>
+                        </span>
+                        <input type="password" id="loginPassword" required placeholder="Enter your Reg No as password" 
+                               class="w-full pl-10 pr-10 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-vignan-500">
+                        <button type="button" onclick="togglePasswordVisibility()" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                            <i class="fa-solid fa-eye" id="passToggleIcon"></i>
+                        </button>
+                    </div>
+                    <p class="text-[11px] text-amber-600 dark:text-amber-400 mt-1.5 flex items-center gap-1 font-medium">
+                        <i class="fa-solid fa-circle-info"></i> Password must match your Reg No.
+                    </p>
+                </div>
+
+                <!-- Department & Semester Options -->
+                <div class="grid grid-cols-2 gap-3 pt-1">
+                    <div>
+                        <label for="loginDept" class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Department</label>
+                        <select id="loginDept" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-900 dark:text-white focus:ring-2 focus:ring-vignan-500 cursor-pointer">
+                            <option value="CSE">CSE - Computer Science</option>
+                            <option value="AI&DS">AI & Data Science</option>
+                            <option value="ECE">ECE - Electronics</option>
+                            <option value="EEE">EEE - Electrical Engg</option>
+                            <option value="IT">Information Tech</option>
+                            <option value="MECH">Mechanical Engg</option>
+                            <option value="CIVIL">Civil Engineering</option>
+                            <option value="BIOTECH">Biotechnology</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="loginSem" class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Semester</label>
+                        <select id="loginSem" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-900 dark:text-white focus:ring-2 focus:ring-vignan-500 cursor-pointer">
+                            <option value="Sem 1">B.Tech Sem 1</option>
+                            <option value="Sem 2">B.Tech Sem 2</option>
+                            <option value="Sem 3">B.Tech Sem 3</option>
+                            <option value="Sem 4">B.Tech Sem 4</option>
+                            <option value="Sem 5" selected>B.Tech Sem 5</option>
+                            <option value="Sem 6">B.Tech Sem 6</option>
+                            <option value="Sem 7">B.Tech Sem 7</option>
+                            <option value="Sem 8">B.Tech Sem 8</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="w-full mt-2 bg-vignan-600 hover:bg-vignan-700 active:bg-vignan-800 text-white font-bold py-3 px-4 rounded-xl text-sm shadow-lg flex items-center justify-center gap-2 transition-all cursor-pointer">
+                    <i class="fa-solid fa-right-to-bracket"></i>
+                    <span>Login to B.Tech Student Hub</span>
+                </button>
+
+                <!-- Demo Login Button -->
+                <button type="button" onclick="fillDemoCredentials()" class="w-full text-center text-xs font-semibold text-vignan-600 dark:text-amber-400 hover:underline pt-2 cursor-pointer">
+                    <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Fill Demo Student Credentials
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Application Dashboard Container -->
+    <div id="appDashboard" class="min-h-full flex flex-col hidden">
+
+        <!-- Top Navigation Header -->
+        <header class="vignan-gradient text-white shadow-lg border-b-4 border-amber-500 sticky top-0 z-30">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                    
+                    <!-- University Crest & Portal Identity -->
+                    <div class="flex items-center gap-3.5">
+                        <div class="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-amber-400 font-black text-2xl shadow-inner">
+                            <i class="fa-solid fa-graduation-cap"></i>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-semibold uppercase tracking-wider text-amber-300 bg-amber-500/20 px-2 py-0.5 rounded border border-amber-400/30">
+                                    VFSTR B.Tech Portal
+                                </span>
+                                <span class="text-xs text-slate-300 hidden sm:inline">• Vadlamudi, Guntur</span>
+                            </div>
+                            <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-white flex items-center gap-2">
+                                B.Tech Academic, Library & MERN Hub
+                            </h1>
+                        </div>
+                    </div>
+
+                    <!-- Student Profile & Active Header Controls -->
+                    <div class="flex flex-wrap items-center gap-3 bg-white/10 backdrop-blur-md p-2.5 rounded-xl border border-white/15 text-xs sm:text-sm">
+                        <div class="flex items-center gap-2 border-r border-white/20 pr-3">
+                            <div class="w-8 h-8 rounded-lg bg-amber-400 text-slate-900 flex items-center justify-center font-bold">
+                                <i class="fa-solid fa-user-graduate"></i>
+                            </div>
+                            <div>
+                                <div class="font-bold text-white leading-none" id="studentNameDisplay">Student Name</div>
+                                <div class="text-[10px] text-amber-300 font-mono mt-0.5" id="regNoDisplay">Reg: 211FA04000</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Department Selector -->
+                        <div class="flex items-center gap-1.5">
+                            <label for="departmentSelect" class="text-slate-300 text-xs hidden sm:inline">Dept:</label>
+                            <select id="departmentSelect" onchange="updateStudentProfileFromHeader()" class="bg-slate-900/60 border border-white/20 rounded-lg text-xs py-1 px-2 text-white focus:outline-none focus:ring-1 focus:ring-amber-400 cursor-pointer">
+                                <option value="CSE">CSE</option>
+                                <option value="AI&DS">AI & DS</option>
+                                <option value="ECE">ECE</option>
+                                <option value="EEE">EEE</option>
+                                <option value="IT">IT</option>
+                                <option value="MECH">MECH</option>
+                                <option value="CIVIL">CIVIL</option>
+                                <option value="BIOTECH">BIOTECH</option>
+                            </select>
+                        </div>
+
+                        <!-- Semester Selector -->
+                        <div class="flex items-center gap-1.5">
+                            <label for="semesterSelect" class="text-slate-300 text-xs hidden sm:inline">Sem:</label>
+                            <select id="semesterSelect" onchange="updateStudentProfileFromHeader()" class="bg-slate-900/60 border border-white/20 rounded-lg text-xs py-1 px-2 text-white focus:outline-none focus:ring-1 focus:ring-amber-400 cursor-pointer">
+                                <option value="Sem 1">Sem 1</option>
+                                <option value="Sem 2">Sem 2</option>
+                                <option value="Sem 3">Sem 3</option>
+                                <option value="Sem 4">Sem 4</option>
+                                <option value="Sem 5">Sem 5</option>
+                                <option value="Sem 6">Sem 6</option>
+                                <option value="Sem 7">Sem 7</option>
+                                <option value="Sem 8">Sem 8</option>
+                            </select>
+                        </div>
+
+                        <!-- Theme Toggle Button -->
+                        <button id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Dark/Light Theme" class="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-amber-300 transition-all ml-auto sm:ml-1 cursor-pointer">
+                            <i class="fa-solid fa-moon text-sm" id="themeIcon"></i>
+                        </button>
+
+                        <!-- Logout Button -->
+                        <button onclick="handleLogout()" title="Logout" class="px-2.5 py-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/40 text-rose-200 border border-rose-400/30 transition-all text-xs font-semibold flex items-center gap-1.5 cursor-pointer ml-1">
+                            <i class="fa-solid fa-right-from-bracket"></i>
+                            <span class="hidden md:inline">Logout</span>
+                        </button>
+                    </div>
+
+                </div>
+
+                <!-- Tab Navigation Bar -->
+                <nav class="flex items-center gap-2 mt-4 overflow-x-auto pb-1 scrollbar-none text-xs font-semibold">
+                    <button onclick="switchTab('dashboard')" id="tab-dashboard" class="nav-tab active px-4 py-2 rounded-xl border border-white/10 flex items-center gap-2 shrink-0 transition-all cursor-pointer">
+                        <i class="fa-solid fa-chart-pie"></i> Academic Dashboard
+                    </button>
+                    <button onclick="switchTab('study-clock')" id="tab-study-clock" class="nav-tab px-4 py-2 bg-white/10 text-white hover:bg-white/20 rounded-xl border border-white/10 flex items-center gap-2 shrink-0 transition-all cursor-pointer">
+                        <i class="fa-solid fa-stopwatch text-amber-300"></i> Study Clock & Pomodoro
+                    </button>
+                    <button onclick="switchTab('calendar')" id="tab-calendar" class="nav-tab px-4 py-2 bg-white/10 text-white hover:bg-white/20 rounded-xl border border-white/10 flex items-center gap-2 shrink-0 transition-all cursor-pointer">
+                        <i class="fa-solid fa-calendar-days text-sky-300"></i> Academic Calendar & Holidays
+                    </button>
+                    <button onclick="switchTab('books')" id="tab-books" class="nav-tab px-4 py-2 bg-white/10 text-white hover:bg-white/20 rounded-xl border border-white/10 flex items-center gap-2 shrink-0 transition-all cursor-pointer">
+                        <i class="fa-solid fa-book-open text-amber-300"></i> Books Library
+                    </button>
+                    <button onclick="switchTab('tools')" id="tab-tools" class="nav-tab px-4 py-2 bg-white/10 text-white hover:bg-white/20 rounded-xl border border-white/10 flex items-center gap-2 shrink-0 transition-all cursor-pointer">
+                        <i class="fa-solid fa-calculator"></i> GPA & Attendance Calculators
+                    </button>
+                    <button onclick="switchTab('gate')" id="tab-gate" class="nav-tab px-4 py-2 bg-white/10 text-white hover:bg-white/20 rounded-xl border border-white/10 flex items-center gap-2 shrink-0 transition-all cursor-pointer">
+                        <i class="fa-solid fa-briefcase"></i> GATE & Placements Prep
+                    </button>
+
+                    <!-- NEW: MERN STACK & REACT HUB TAB -->
+                    <button onclick="switchTab('mern')" id="tab-mern" class="nav-tab px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white hover:opacity-90 rounded-xl border border-white/20 flex items-center gap-2 shrink-0 transition-all cursor-pointer shadow-md">
+                        <i class="fa-brands fa-react text-sky-300 text-base animate-spin" style="animation-duration: 8s;"></i> MERN Stack & React Lab
+                    </button>
+
+                    <button onclick="switchTab('assistant')" id="tab-assistant" class="nav-tab px-4 py-2 bg-white/10 text-white hover:bg-white/20 rounded-xl border border-white/10 flex items-center gap-2 shrink-0 transition-all cursor-pointer">
+                        <i class="fa-solid fa-robot text-emerald-300"></i> AI Study Assistant
+                    </button>
+                </nav>
+            </div>
+        </header>
+
+        <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+            <!-- TAB 1: ACADEMIC DASHBOARD & TASKS -->
+            <section id="view-dashboard" class="space-y-6">
+                
+                <!-- Quick Overview Widgets Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+                    
+                    <!-- Semester Completion Progress Card -->
+                    <div class="lg:col-span-8 bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
+                                    <h2 class="font-bold text-slate-800 dark:text-slate-100 text-lg">Active Academic Progress</h2>
+                                </div>
+                                <span class="text-xs font-semibold px-2.5 py-1 bg-vignan-50 dark:bg-vignan-800/50 text-vignan-600 dark:text-vignan-100 rounded-lg border border-vignan-500/20" id="dashSemTag">
+                                    B.Tech CSE • Sem 5
+                                </span>
+                            </div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Current Semester Progress (Week 8 of 16 weeks completed)</p>
+                            
+                            <!-- Progress Bar -->
+                            <div class="mt-4">
+                                <div class="flex justify-between text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                                    <span>Mid-Exam Phase 1 Completed</span>
+                                    <span>54% Progress</span>
+                                </div>
+                                <div class="w-full h-3 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden p-0.5 border border-slate-200 dark:border-slate-600">
+                                    <div class="progress-bar-fill h-full bg-gradient-to-r from-vignan-600 to-amber-500 rounded-full" style="width: 54%"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Mini Stat Pills -->
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-5 pt-4 border-t border-slate-100 dark:border-slate-700/60">
+                            <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border border-slate-200/60 dark:border-slate-700">
+                                <div class="text-[11px] font-semibold text-slate-500 dark:text-slate-400">Current Target CGPA</div>
+                                <div class="text-lg font-black text-vignan-600 dark:text-amber-400">8.75 / 10</div>
+                            </div>
+                            <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border border-slate-200/60 dark:border-slate-700">
+                                <div class="text-[11px] font-semibold text-slate-500 dark:text-slate-400">Avg Attendance</div>
+                                <div class="text-lg font-black text-emerald-600 dark:text-emerald-400">88.5%</div>
+                            </div>
+                            <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border border-slate-200/60 dark:border-slate-700">
+                                <div class="text-[11px] font-semibold text-slate-500 dark:text-slate-400">Study Streak</div>
+                                <div class="text-lg font-black text-amber-500" id="dashStreakDisplay">🔥 5 Days</div>
+                            </div>
+                            <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border border-slate-200/60 dark:border-slate-700">
+                                <div class="text-[11px] font-semibold text-slate-500 dark:text-slate-400">Next Upcoming Exam</div>
+                                <div class="text-xs font-bold text-rose-600 dark:text-rose-400 mt-1">Mid-2 Exams (Oct 12)</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Today's Schedule & Quick Action Card -->
+                    <div class="lg:col-span-4 bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <h3 class="font-bold text-slate-800 dark:text-slate-100 text-sm flex items-center gap-2">
+                                    <i class="fa-solid fa-clock text-amber-500"></i> Today's Class Schedule
+                                </h3>
+                                <span class="text-[11px] font-semibold text-slate-400" id="currentDateStr">Today</span>
+                            </div>
+
+                            <!-- Class list -->
+                            <div class="space-y-2.5">
+                                <div class="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-900/60 rounded-xl border-l-4 border-vignan-600 text-xs">
+                                    <div>
+                                        <div class="font-bold text-slate-800 dark:text-slate-200">Data Structures & Algo</div>
+                                        <div class="text-[11px] text-slate-500">Sangam Block • Room 302</div>
+                                    </div>
+                                    <span class="font-mono text-[11px] font-semibold bg-vignan-100 dark:bg-vignan-800 text-vignan-700 dark:text-vignan-200 px-2 py-0.5 rounded">09:00 - 10:40 AM</span>
+                                </div>
+                                <div class="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-900/60 rounded-xl border-l-4 border-emerald-500 text-xs">
+                                    <div>
+                                        <div class="font-bold text-slate-800 dark:text-slate-200">Full Stack Web Dev (MERN)</div>
+                                        <div class="text-[11px] text-slate-500">Aryabhata Block • Hall 101</div>
+                                    </div>
+                                    <span class="font-mono text-[11px] font-semibold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 px-2 py-0.5 rounded">11:00 - 12:40 PM</span>
+                                </div>
+                                <div class="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-900/60 rounded-xl border-l-4 border-amber-500 text-xs">
+                                    <div>
+                                        <div class="font-bold text-slate-800 dark:text-slate-200">Operating Systems Lab</div>
+                                        <div class="text-[11px] text-slate-500">IT Lab 4 • Computer Center</div>
+                                    </div>
+                                    <span class="font-mono text-[11px] font-semibold bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 px-2 py-0.5 rounded">02:00 - 03:40 PM</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-700/60 flex items-center gap-2">
+                            <button onclick="switchTab('study-clock')" class="flex-1 py-2 bg-vignan-600 hover:bg-vignan-700 text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+                                <i class="fa-solid fa-play text-amber-300"></i> Start Study Timer
+                            </button>
+                            <button onclick="switchTab('mern')" class="py-2 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1 cursor-pointer">
+                                <i class="fa-brands fa-react"></i> MERN Lab
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Academic Tasks & Deadlines Section -->
+                <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-700">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                                <i class="fa-solid fa-list-check text-vignan-600 dark:text-amber-400"></i> B.Tech Homework & Task Tracker
+                            </h2>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Track pending assignments, lab records, and mid-term preparations</p>
+                        </div>
+                        
+                        <div class="flex items-center gap-2">
+                            <select id="taskFilterSubject" onchange="renderTasks()" class="px-3 py-1.5 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-vignan-500 cursor-pointer">
+                                <option value="ALL">All Subjects</option>
+                                <option value="DSA">DSA</option>
+                                <option value="MERN">MERN / Web</option>
+                                <option value="OS">Operating Systems</option>
+                                <option value="DBMS">DBMS</option>
+                                <option value="GATE">GATE Prep</option>
+                            </select>
+                            <button onclick="openAddTaskModal()" class="px-3.5 py-1.5 bg-vignan-600 hover:bg-vignan-700 text-white font-semibold rounded-xl text-xs flex items-center gap-1.5 shadow transition-all cursor-pointer">
+                                <i class="fa-solid fa-plus"></i> Add New Task
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Tasks List Grid -->
+                    <div id="tasksListContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                        <!-- Dynamic Tasks Injected via JS -->
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- TAB 2: STUDY TIME CLOCK & POMODORO TIMER -->
+            <section id="view-study-clock" class="space-y-6 hidden">
+                <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-100 dark:border-slate-700">
+                        <div>
+                            <span class="text-xs font-bold uppercase tracking-widest text-vignan-600 dark:text-amber-400 bg-vignan-50 dark:bg-vignan-900/60 px-2.5 py-1 rounded-md border border-vignan-500/20">
+                                Productivity Suite
+                            </span>
+                            <h2 class="text-2xl font-black text-slate-800 dark:text-slate-100 mt-1 flex items-center gap-2">
+                                <i class="fa-solid fa-stopwatch text-amber-500"></i> B.Tech Study Time Clock & Tracker
+                            </h2>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Stay focused during long engineering study sessions with built-in Pomodoro, Stopwatch, and ambient sound generator.</p>
+                        </div>
+
+                        <!-- Timer Mode Tabs -->
+                        <div class="flex flex-wrap items-center gap-1 bg-slate-100 dark:bg-slate-900 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-700">
+                            <button onclick="setTimerMode('pomodoro')" id="timerModePomo" class="px-4 py-2 rounded-xl text-xs font-bold bg-vignan-600 text-white shadow-sm transition-all cursor-pointer">
+                                Pomodoro (25m)
+                            </button>
+                            <button onclick="setTimerMode('shortBreak')" id="timerModeShort" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer">
+                                Short Break (5m)
+                            </button>
+                            <button onclick="setTimerMode('longBreak')" id="timerModeLong" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer">
+                                Long Break (15m)
+                            </button>
+                            <button onclick="setTimerMode('stopwatch')" id="timerModeStopwatch" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer">
+                                Stopwatch ⏱️
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Clock Interactive Display Section -->
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center py-6">
+                        
+                        <!-- Left: Circular Clock Graphic -->
+                        <div class="lg:col-span-7 flex flex-col items-center justify-center relative">
+                            <div class="relative w-64 h-64 sm:w-80 sm:h-80 flex items-center justify-center">
+                                <!-- Circular SVG Ring -->
+                                <svg class="w-full h-full transform -rotate-90 drop-shadow-md">
+                                    <circle cx="50%" cy="50%" r="42%" class="stroke-slate-200 dark:stroke-slate-700" stroke-width="12" fill="transparent" />
+                                    <circle id="timerProgressCircle" cx="50%" cy="50%" r="42%" class="stroke-vignan-600 dark:stroke-amber-400 timer-circle" stroke-width="12" stroke-linecap="round" fill="transparent" stroke-dasharray="750" stroke-dashoffset="0" />
+                                </svg>
+                                
+                                <!-- Center Time Display -->
+                                <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+                                    <span id="timerStatusLabel" class="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-400">Focus Mode</span>
+                                    <h3 id="timerDigitsDisplay" class="text-5xl sm:text-6xl font-black font-mono tracking-tight text-slate-900 dark:text-white my-1">
+                                        25:00
+                                    </h3>
+                                    <div class="flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400 font-semibold" id="timerSubjectTag">
+                                        <i class="fa-solid fa-book-bookmark"></i> Subject: Data Structures
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Timer Main Control Buttons -->
+                            <div class="flex items-center gap-4 mt-8">
+                                <button id="timerToggleBtn" onclick="toggleTimer()" class="w-36 py-3.5 bg-vignan-600 hover:bg-vignan-700 active:bg-vignan-800 text-white rounded-2xl font-bold text-sm shadow-xl flex items-center justify-center gap-2 transition-all transform active:scale-95 cursor-pointer">
+                                    <i class="fa-solid fa-play" id="timerToggleIcon"></i>
+                                    <span id="timerToggleText">Start Session</span>
+                                </button>
+                                <button onclick="resetTimer()" class="p-3.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-2xl font-bold text-sm transition-all cursor-pointer" title="Reset Timer">
+                                    <i class="fa-solid fa-rotate-right"></i>
+                                </button>
+                                <button onclick="playChimeSound()" class="p-3.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-amber-500 rounded-2xl font-bold text-sm transition-all cursor-pointer" title="Test Chime Sound">
+                                    <i class="fa-solid fa-bell"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Right: Session Stats & Subject Selector & Ambient Noise -->
+                        <div class="lg:col-span-5 space-y-4 bg-slate-50 dark:bg-slate-900/50 p-5 rounded-2xl border border-slate-200 dark:border-slate-700">
+                            
+                            <h4 class="font-bold text-slate-800 dark:text-slate-200 text-sm flex items-center gap-2">
+                                <i class="fa-solid fa-sliders text-vignan-600 dark:text-amber-400"></i> Session Settings & Log
+                            </h4>
+
+                            <!-- Select Subject for Log -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">Select Subject Being Studied</label>
+                                <select id="studySubjectSelect" onchange="updateStudySubjectTag()" class="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-vignan-500 cursor-pointer">
+                                    <option value="Data Structures & Algorithms">Data Structures & Algorithms</option>
+                                    <option value="MERN Stack & React.js">MERN Stack & React.js</option>
+                                    <option value="Operating Systems">Operating Systems</option>
+                                    <option value="Database Management (DBMS)">Database Management (DBMS)</option>
+                                    <option value="Computer Networks">Computer Networks</option>
+                                    <option value="GATE Preparation">GATE Preparation</option>
+                                    <option value="General Self Study">General Self Study</option>
+                                </select>
+                            </div>
+
+                            <!-- Today's Study Summary Card -->
+                            <div class="grid grid-cols-2 gap-3 pt-2">
+                                <div class="bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700 text-center">
+                                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Today's Focus Time</span>
+                                    <div class="text-xl font-black text-vignan-600 dark:text-amber-400 mt-0.5" id="todayStudyMinsDisplay">
+                                        75 Mins
+                                    </div>
+                                </div>
+                                <div class="bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700 text-center">
+                                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Completed Poms</span>
+                                    <div class="text-xl font-black text-emerald-600 dark:text-emerald-400 mt-0.5" id="todayPomoCountDisplay">
+                                        3 Sessions
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Ambient White Noise Synth Player -->
+                            <div class="pt-3 border-t border-slate-200 dark:border-slate-700 space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <label class="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                                        <i class="fa-solid fa-headphones text-purple-500"></i> Ambient Focus Sound Generator
+                                    </label>
+                                    <span class="text-[10px] font-semibold text-slate-400" id="soundStatusLabel">Off</span>
+                                </div>
+                                <div class="grid grid-cols-3 gap-2">
+                                    <button onclick="toggleAmbientNoise('rain')" id="noiseBtnRain" class="py-2 px-3 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-300 transition-all flex items-center justify-center gap-1 cursor-pointer">
+                                        🌧️ Rain Synth
+                                    </button>
+                                    <button onclick="toggleAmbientNoise('waves')" id="noiseBtnWaves" class="py-2 px-3 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-300 transition-all flex items-center justify-center gap-1 cursor-pointer">
+                                        🌊 Waves
+                                    </button>
+                                    <button onclick="toggleAmbientNoise('white')" id="noiseBtnWhite" class="py-2 px-3 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-300 transition-all flex items-center justify-center gap-1 cursor-pointer">
+                                        📻 White Noise
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Recent Log List -->
+                            <div class="pt-2">
+                                <div class="text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">Recent Completed Sessions</div>
+                                <div id="studySessionLogContainer" class="space-y-1.5 max-h-36 overflow-y-auto text-xs pr-1">
+                                    <!-- Dynamic Session Logs Injected via JS -->
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 3: ACADEMIC CALENDAR & HOLIDAY LIST -->
+            <section id="view-calendar" class="space-y-6 hidden">
+                
+                <!-- Main Header Banner -->
+                <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-widest text-vignan-600 dark:text-amber-400 bg-vignan-50 dark:bg-vignan-900/60 px-2.5 py-1 rounded-md border border-vignan-500/20">
+                            VFSTR Official Schedule
+                        </span>
+                        <h2 class="text-2xl font-black text-slate-800 dark:text-slate-100 mt-1 flex items-center gap-2">
+                            <i class="fa-solid fa-calendar-days text-sky-500"></i> Academic Calendar & University Holiday List
+                        </h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Complete semester schedule, exam dates, lab schedules, and official Vignan University holiday dates for 2026-2027.</p>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <button onclick="filterCalCategory('ALL')" id="calCatAll" class="px-3 py-1.5 bg-vignan-600 text-white font-bold rounded-xl text-xs shadow-sm cursor-pointer">
+                            All Events
+                        </button>
+                        <button onclick="filterCalCategory('EXAM')" id="calCatExam" class="px-3 py-1.5 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold rounded-xl text-xs hover:bg-slate-200 cursor-pointer">
+                            📝 Exams
+                        </button>
+                        <button onclick="filterCalCategory('HOLIDAY')" id="calCatHoliday" class="px-3 py-1.5 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold rounded-xl text-xs hover:bg-slate-200 cursor-pointer">
+                            🎉 Holidays
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Two Column Layout: Academic Timeline + Official Holidays List -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    
+                    <!-- Left: Academic Semester Key Events Timeline (7 Cols) -->
+                    <div class="lg:col-span-7 bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                        <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-700">
+                            <h3 class="font-bold text-slate-800 dark:text-slate-100 text-base flex items-center gap-2">
+                                <i class="fa-solid fa-graduation-cap text-vignan-600 dark:text-amber-400"></i> B.Tech Academic Calendar Timeline
+                            </h3>
+                            <span class="text-xs font-semibold text-slate-400">Odd & Even Semesters 2026</span>
+                        </div>
+
+                        <!-- Interactive Timeline Items -->
+                        <div class="space-y-3 relative before:absolute before:inset-0 before:left-4 before:w-0.5 before:bg-slate-200 dark:before:bg-slate-700 pl-2">
+                            
+                            <!-- Item 1 -->
+                            <div class="relative pl-7 group cal-item" data-category="ACADEMIC">
+                                <div class="absolute left-2 top-1.5 w-4 h-4 rounded-full bg-vignan-600 border-2 border-white dark:border-slate-800 shadow"></div>
+                                <div class="p-3 bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-200 dark:border-slate-700/60">
+                                    <div class="flex items-center justify-between">
+                                        <span class="font-bold text-xs text-vignan-600 dark:text-amber-400">Commencement of Sem 5 Classes</span>
+                                        <span class="text-[10px] font-mono bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded">July 06, 2026</span>
+                                    </div>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Start of instruction phase for B.Tech III Year Students across all departments.</p>
+                                </div>
+                            </div>
+
+                            <!-- Item 2 -->
+                            <div class="relative pl-7 group cal-item" data-category="EXAM">
+                                <div class="absolute left-2 top-1.5 w-4 h-4 rounded-full bg-amber-500 border-2 border-white dark:border-slate-800 shadow"></div>
+                                <div class="p-3 bg-amber-50/50 dark:bg-amber-950/20 rounded-xl border border-amber-200 dark:border-amber-900/40">
+                                    <div class="flex items-center justify-between">
+                                        <span class="font-bold text-xs text-amber-700 dark:text-amber-300">Mid-Term Examination Phase 1</span>
+                                        <span class="text-[10px] font-mono bg-amber-200 dark:bg-amber-900/60 text-amber-800 dark:text-amber-200 px-2 py-0.5 rounded font-bold">Aug 24 - Aug 29, 2026</span>
+                                    </div>
+                                    <p class="text-xs text-slate-600 dark:text-slate-400 mt-1">First mid-term evaluations for 30% weightage in internal assessment.</p>
+                                </div>
+                            </div>
+
+                            <!-- Item 3 -->
+                            <div class="relative pl-7 group cal-item" data-category="EXAM">
+                                <div class="absolute left-2 top-1.5 w-4 h-4 rounded-full bg-rose-500 border-2 border-white dark:border-slate-800 shadow"></div>
+                                <div class="p-3 bg-rose-50/50 dark:bg-rose-950/20 rounded-xl border border-rose-200 dark:border-rose-900/40">
+                                    <div class="flex items-center justify-between">
+                                        <span class="font-bold text-xs text-rose-700 dark:text-rose-300">Mid-Term Examination Phase 2</span>
+                                        <span class="text-[10px] font-mono bg-rose-200 dark:bg-rose-900/60 text-rose-800 dark:text-rose-200 px-2 py-0.5 rounded font-bold">Oct 12 - Oct 17, 2026</span>
+                                    </div>
+                                    <p class="text-xs text-slate-600 dark:text-slate-400 mt-1">Second mid examinations covering remaining 50% syllabus units.</p>
+                                </div>
+                            </div>
+
+                            <!-- Item 4 -->
+                            <div class="relative pl-7 group cal-item" data-category="EXAM">
+                                <div class="absolute left-2 top-1.5 w-4 h-4 rounded-full bg-purple-500 border-2 border-white dark:border-slate-800 shadow"></div>
+                                <div class="p-3 bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-200 dark:border-slate-700/60">
+                                    <div class="flex items-center justify-between">
+                                        <span class="font-bold text-xs text-purple-600 dark:text-purple-300">Practical & External Lab Examinations</span>
+                                        <span class="text-[10px] font-mono bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded">Oct 19 - Oct 24, 2026</span>
+                                    </div>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">External viva voce and laboratory practical exams at respective department labs.</p>
+                                </div>
+                            </div>
+
+                            <!-- Item 5 -->
+                            <div class="relative pl-7 group cal-item" data-category="EXAM">
+                                <div class="absolute left-2 top-1.5 w-4 h-4 rounded-full bg-emerald-500 border-2 border-white dark:border-slate-800 shadow"></div>
+                                <div class="p-3 bg-emerald-50/50 dark:bg-emerald-950/20 rounded-xl border border-emerald-200 dark:border-emerald-900/40">
+                                    <div class="flex items-center justify-between">
+                                        <span class="font-bold text-xs text-emerald-700 dark:text-emerald-300">Semester End Main Theory Examinations</span>
+                                        <span class="text-[10px] font-mono bg-emerald-200 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-200 px-2 py-0.5 rounded font-bold">Nov 02 - Nov 18, 2026</span>
+                                    </div>
+                                    <p class="text-xs text-slate-600 dark:text-slate-400 mt-1">VFSTR University End Semester theory examinations.</p>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Right: Official University Holiday List (5 Cols) -->
+                    <div class="lg:col-span-5 bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                        <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-700">
+                            <h3 class="font-bold text-slate-800 dark:text-slate-100 text-base flex items-center gap-2">
+                                <i class="fa-solid fa-umbrella-beach text-amber-500"></i> VFSTR Official Holidays List
+                            </h3>
+                            <span class="text-xs font-semibold text-slate-400">2026 Schedule</span>
+                        </div>
+
+                        <div class="space-y-2.5 max-h-[480px] overflow-y-auto pr-1" id="holidayListContainer">
+                            <!-- Holiday Items -->
+                            <div class="p-3 bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-200/80 dark:border-slate-700/80 flex items-center justify-between cal-item" data-category="HOLIDAY">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 font-bold flex flex-col items-center justify-center text-xs leading-tight">
+                                        <span>JAN</span>
+                                        <span class="text-sm font-black">14-16</span>
+                                    </div>
+                                    <div>
+                                        <div class="font-bold text-xs text-slate-800 dark:text-slate-200">Sankranti Vacation</div>
+                                        <div class="text-[11px] text-slate-500">Pongal / Kanuma Festival</div>
+                                    </div>
+                                </div>
+                                <span class="text-[10px] font-bold px-2 py-0.5 bg-amber-50 dark:bg-amber-900/40 text-amber-600 dark:text-amber-300 rounded border border-amber-300/40">3 Days</span>
+                            </div>
+
+                            <div class="p-3 bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-200/80 dark:border-slate-700/80 flex items-center justify-between cal-item" data-category="HOLIDAY">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-xl bg-sky-100 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 font-bold flex flex-col items-center justify-center text-xs leading-tight">
+                                        <span>JAN</span>
+                                        <span class="text-sm font-black">26</span>
+                                    </div>
+                                    <div>
+                                        <div class="font-bold text-xs text-slate-800 dark:text-slate-200">Republic Day</div>
+                                        <div class="text-[11px] text-slate-500">National Holiday & Flag Hoisting</div>
+                                    </div>
+                                </div>
+                                <span class="text-[10px] font-bold px-2 py-0.5 bg-sky-50 dark:bg-sky-900/40 text-sky-600 dark:text-sky-300 rounded border border-sky-300/40">1 Day</span>
+                            </div>
+
+                            <div class="p-3 bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-200/80 dark:border-slate-700/80 flex items-center justify-between cal-item" data-category="HOLIDAY">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 font-bold flex flex-col items-center justify-center text-xs leading-tight">
+                                        <span>AUG</span>
+                                        <span class="text-sm font-black">15</span>
+                                    </div>
+                                    <div>
+                                        <div class="font-bold text-xs text-slate-800 dark:text-slate-200">Independence Day</div>
+                                        <div class="text-[11px] text-slate-500">National Celebration</div>
+                                    </div>
+                                </div>
+                                <span class="text-[10px] font-bold px-2 py-0.5 bg-purple-50 dark:bg-purple-900/40 text-purple-600 dark:text-purple-300 rounded border border-purple-300/40">1 Day</span>
+                            </div>
+
+                            <div class="p-3 bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-200/80 dark:border-slate-700/80 flex items-center justify-between cal-item" data-category="HOLIDAY">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-xl bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 font-bold flex flex-col items-center justify-center text-xs leading-tight">
+                                        <span>OCT</span>
+                                        <span class="text-sm font-black">19-24</span>
+                                    </div>
+                                    <div>
+                                        <div class="font-bold text-xs text-slate-800 dark:text-slate-200">Dussehra Holidays</div>
+                                        <div class="text-[11px] text-slate-500">Vijayadasami University Recess</div>
+                                    </div>
+                                </div>
+                                <span class="text-[10px] font-bold px-2 py-0.5 bg-rose-50 dark:bg-rose-900/40 text-rose-600 dark:text-rose-300 rounded border border-rose-300/40">6 Days</span>
+                            </div>
+
+                            <div class="p-3 bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-200/80 dark:border-slate-700/80 flex items-center justify-between cal-item" data-category="HOLIDAY">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 font-bold flex flex-col items-center justify-center text-xs leading-tight">
+                                        <span>NOV</span>
+                                        <span class="text-sm font-black">08</span>
+                                    </div>
+                                    <div>
+                                        <div class="font-bold text-xs text-slate-800 dark:text-slate-200">Diwali Festival</div>
+                                        <div class="text-[11px] text-slate-500">Deepavali Holiday</div>
+                                    </div>
+                                </div>
+                                <span class="text-[10px] font-bold px-2 py-0.5 bg-amber-50 dark:bg-amber-900/40 text-amber-600 dark:text-amber-300 rounded border border-amber-300/40">1 Day</span>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- TAB 4: ENGINEERING BOOKS LIBRARY -->
+            <section id="view-books" class="space-y-6 hidden">
+                <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-700">
+                        <div>
+                            <span class="text-xs font-bold uppercase tracking-widest text-vignan-600 dark:text-amber-400 bg-vignan-50 dark:bg-vignan-900/60 px-2.5 py-1 rounded-md border border-vignan-500/20">
+                                Digital Learning Resources
+                            </span>
+                            <h2 class="text-2xl font-black text-slate-800 dark:text-slate-100 mt-1 flex items-center gap-2">
+                                <i class="fa-solid fa-book-open text-amber-500"></i> B.Tech Digital Books & Reference Library
+                            </h2>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Access core reference textbooks, syllabus handbooks, and standard CSE/ECE/MERN engineering books.</p>
+                        </div>
+
+                        <!-- Search & Filter Controls -->
+                        <div class="flex flex-wrap items-center gap-2">
+                            <input type="text" id="bookSearchInput" onkeyup="filterBooks()" placeholder="Search title or author..." class="px-3 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-vignan-500 w-48">
+                            <select id="bookCategorySelect" onchange="filterBooks()" class="px-3 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-300 cursor-pointer">
+                                <option value="ALL">All Disciplines</option>
+                                <option value="CSE">Computer Science / MERN</option>
+                                <option value="ECE">Electronics</option>
+                                <option value="MATHS">Maths & Core</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Books Cards Grid -->
+                    <div id="booksGridContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <!-- Injected via JavaScript -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 5: GPA & ATTENDANCE CALCULATORS -->
+            <section id="view-tools" class="space-y-6 hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    
+                    <!-- SGPA / CGPA Calculator (6 Cols) -->
+                    <div class="lg:col-span-6 bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                        <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-700">
+                            <div>
+                                <h3 class="font-black text-slate-800 dark:text-slate-100 text-lg flex items-center gap-2">
+                                    <i class="fa-solid fa-calculator text-vignan-600 dark:text-amber-400"></i> VFSTR SGPA & CGPA Estimator
+                                </h3>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">Calculates GPA based on VFSTR grading system (S, A, B, C, D, F)</p>
+                            </div>
+                        </div>
+
+                        <div id="gpaSubjectRows" class="space-y-2 max-h-72 overflow-y-auto pr-1">
+                            <!-- Dynamic Subject Grade Rows -->
+                        </div>
+
+                        <button onclick="addGpaSubjectRow()" class="w-full py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+                            <i class="fa-solid fa-plus text-vignan-600 dark:text-amber-400"></i> Add Subject Row
+                        </button>
+
+                        <div class="pt-4 border-t border-slate-100 dark:border-slate-700 flex items-center justify-between bg-vignan-50 dark:bg-vignan-950/40 p-4 rounded-xl border border-vignan-500/20">
+                            <div>
+                                <span class="text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Estimated SGPA</span>
+                                <div class="text-3xl font-black text-vignan-600 dark:text-amber-400" id="calculatedGpaDisplay">0.00 / 10</div>
+                            </div>
+                            <button onclick="calculateGpa()" class="px-5 py-2.5 bg-vignan-600 hover:bg-vignan-700 text-white font-bold rounded-xl text-xs shadow-md transition-all cursor-pointer">
+                                Calculate SGPA
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Attendance Margin Analyzer (6 Cols) -->
+                    <div class="lg:col-span-6 bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                        <div class="pb-3 border-b border-slate-100 dark:border-slate-700">
+                            <h3 class="font-black text-slate-800 dark:text-slate-100 text-lg flex items-center gap-2">
+                                <i class="fa-solid fa-user-check text-emerald-500"></i> 75% Attendance & Bunk Margin Analyzer
+                            </h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Determine how many classes you can afford to miss while staying above 75% requirement.</p>
+                        </div>
+
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Total Conducted Classes</label>
+                                <input type="number" id="attTotalInput" value="120" min="1" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-900 dark:text-white focus:ring-2 focus:ring-vignan-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Classes Attended So Far</label>
+                                <input type="number" id="attAttendedInput" value="106" min="0" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-900 dark:text-white focus:ring-2 focus:ring-vignan-500">
+                            </div>
+
+                            <button onclick="analyzeAttendance()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs shadow-md transition-all cursor-pointer">
+                                Analyze Attendance Margin
+                            </button>
+                        </div>
+
+                        <div id="attResultBox" class="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold text-slate-600 dark:text-slate-300">Current Attendance:</span>
+                                <span class="text-lg font-black text-emerald-600 dark:text-emerald-400" id="attPercentageDisplay">88.33%</span>
+                            </div>
+                            <p class="text-xs text-slate-600 dark:text-slate-400" id="attSummaryText">
+                                You can safely miss up to 21 more classes and still maintain at least 75% attendance!
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- TAB 6: GATE & PLACEMENTS PREP -->
+            <section id="view-gate" class="space-y-6 hidden">
+                <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-700">
+                        <div>
+                            <span class="text-xs font-bold uppercase tracking-widest text-vignan-600 dark:text-amber-400 bg-vignan-50 dark:bg-vignan-900/60 px-2.5 py-1 rounded-md border border-vignan-500/20">
+                                Career & Higher Studies Hub
+                            </span>
+                            <h2 class="text-2xl font-black text-slate-800 dark:text-slate-100 mt-1 flex items-center gap-2">
+                                <i class="fa-solid fa-briefcase text-amber-500"></i> GATE CSE/ECE & Campus Placements Prep
+                            </h2>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Previous year question papers, technical aptitude tests, and coding interview practice.</p>
+                        </div>
+
+                        <button onclick="startGateQuizDemo()" class="px-4 py-2 bg-vignan-600 hover:bg-vignan-700 text-white font-bold rounded-xl text-xs shadow transition-all cursor-pointer">
+                            ⚡ Take Quick Mock Quiz (5 Qs)
+                        </button>
+                    </div>
+
+                    <!-- Topic Cards Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-2">
+                            <div class="w-10 h-10 rounded-xl bg-vignan-100 dark:bg-vignan-900 text-vignan-600 dark:text-amber-400 flex items-center justify-center text-lg font-bold">
+                                <i class="fa-solid fa-code"></i>
+                            </div>
+                            <h3 class="font-bold text-sm text-slate-800 dark:text-slate-100">Data Structures & Algo</h3>
+                            <p class="text-xs text-slate-500">Trees, Graphs, Dynamic Programming, Arrays & Sorting complexity analysis.</p>
+                            <span class="inline-block text-[10px] font-bold text-amber-600 bg-amber-100 dark:bg-amber-950/60 px-2 py-0.5 rounded">High Weightage in GATE</span>
+                        </div>
+
+                        <div class="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-2">
+                            <div class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-900 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-lg font-bold">
+                                <i class="fa-brands fa-react"></i>
+                            </div>
+                            <h3 class="font-bold text-sm text-slate-800 dark:text-slate-100">Full-Stack MERN & Web Tech</h3>
+                            <p class="text-xs text-slate-500">React State Management, Node.js Async I/O, REST APIs, Express Middleware, MongoDB indexing.</p>
+                            <span class="inline-block text-[10px] font-bold text-emerald-600 bg-emerald-100 dark:bg-emerald-950/60 px-2 py-0.5 rounded">Top Campus Hiring Skill</span>
+                        </div>
+
+                        <div class="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-2">
+                            <div class="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-400 flex items-center justify-center text-lg font-bold">
+                                <i class="fa-solid fa-gears"></i>
+                            </div>
+                            <h3 class="font-bold text-sm text-slate-800 dark:text-slate-100">Operating Systems & DB</h3>
+                            <p class="text-xs text-slate-500">Process Scheduling, Deadlocks, SQL Queries, Normalization, ACID properties.</p>
+                            <span class="inline-block text-[10px] font-bold text-purple-600 bg-purple-100 dark:bg-purple-950/60 px-2 py-0.5 rounded">Core CS Fundamentals</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 7: NEW MERN STACK & REACT INTERACTIVE LAB -->
+            <section id="view-mern" class="space-y-6 hidden">
+                
+                <!-- Main Lab Header -->
+                <div class="bg-gradient-to-r from-slate-900 via-vignan-800 to-slate-900 rounded-2xl p-6 border border-emerald-500/30 text-white shadow-xl relative overflow-hidden">
+                    <div class="absolute -right-10 -bottom-10 opacity-10 text-emerald-400 text-9xl pointer-events-none">
+                        <i class="fa-brands fa-react"></i>
+                    </div>
+
+                    <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                        <div>
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 text-[11px] font-mono font-bold uppercase tracking-wider">
+                                    Full-Stack Development Suite
+                                </span>
+                                <span class="text-xs text-slate-300">• B.Tech Modern Curriculum</span>
+                            </div>
+                            <h2 class="text-2xl sm:text-3xl font-black text-white flex items-center gap-3">
+                                <i class="fa-brands fa-react text-sky-400 text-3xl animate-spin" style="animation-duration:10s;"></i>
+                                MERN Stack & React Engineering Lab
+                            </h2>
+                            <p class="text-xs sm:text-sm text-slate-300 max-w-2xl mt-1">
+                                Master MongoDB, Express.js, React.js, and Node.js. Practice live REST API calls, test interactive React components, and build full-stack web applications.
+                            </p>
+                        </div>
+
+                        <!-- Pill Switcher -->
+                        <div class="flex flex-wrap items-center gap-2 bg-slate-800/80 backdrop-blur-md p-1.5 rounded-xl border border-slate-700/60 text-xs font-semibold">
+                            <button onclick="setMernSubTab('arch')" id="mernSubTabArch" class="px-3 py-1.5 rounded-lg bg-emerald-500 text-slate-950 font-bold transition-all cursor-pointer">
+                                🗺️ Architecture Workflow
+                            </button>
+                            <button onclick="setMernSubTab('api')" id="mernSubTabApi" class="px-3 py-1.5 rounded-lg hover:bg-slate-700 text-slate-300 transition-all cursor-pointer">
+                                ⚡ REST API Simulator
+                            </button>
+                            <button onclick="setMernSubTab('react')" id="mernSubTabReact" class="px-3 py-1.5 rounded-lg hover:bg-slate-700 text-slate-300 transition-all cursor-pointer">
+                                ⚛️ React Sandbox
+                            </button>
+                            <button onclick="setMernSubTab('code')" id="mernSubTabCode" class="px-3 py-1.5 rounded-lg hover:bg-slate-700 text-slate-300 transition-all cursor-pointer">
+                                📦 Full-Stack Boilerplate
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SUBTAB 1: ARCHITECTURE WORKFLOW VISUALIZER -->
+                <div id="mernSectionArch" class="space-y-6">
+                    <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm space-y-6">
+                        <div class="border-b border-slate-100 dark:border-slate-700 pb-3">
+                            <h3 class="font-bold text-slate-800 dark:text-slate-100 text-base flex items-center gap-2">
+                                <i class="fa-solid fa-diagram-project text-emerald-500"></i> Modern MERN Stack Data Flow & Architecture
+                            </h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">How the React client interacts with Express/Node server and MongoDB database</p>
+                        </div>
+
+                        <!-- Visual 4-Pillar Grid -->
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 relative">
+                            
+                            <!-- Pillar 1: MongoDB -->
+                            <div class="bg-slate-50 dark:bg-slate-900/60 p-4 rounded-2xl border-2 border-emerald-500/30 hover:border-emerald-500 transition-all space-y-3 relative group">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-2xl font-black text-emerald-500">M</span>
+                                    <span class="text-[10px] font-mono uppercase bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded font-bold">Database</span>
+                                </div>
+                                <h4 class="font-bold text-sm text-slate-800 dark:text-slate-100">MongoDB</h4>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">NoSQL JSON document store with Mongoose ORM schema modeling.</p>
+                                <div class="bg-slate-900 text-emerald-400 p-2 rounded-lg text-[10px] font-mono">
+                                    { _id: ObjectId(), name: "K. Sai", gpa: 8.75 }
+                                </div>
+                            </div>
+
+                            <!-- Pillar 2: Express -->
+                            <div class="bg-slate-50 dark:bg-slate-900/60 p-4 rounded-2xl border-2 border-slate-400/30 hover:border-slate-400 transition-all space-y-3 relative group">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-2xl font-black text-slate-600 dark:text-slate-300">E</span>
+                                    <span class="text-[10px] font-mono uppercase bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded font-bold">Backend Web Framework</span>
+                                </div>
+                                <h4 class="font-bold text-sm text-slate-800 dark:text-slate-100">Express.js</h4>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">Lightweight HTTP router handling CORS, JWT auth & REST endpoints.</p>
+                                <div class="bg-slate-900 text-sky-300 p-2 rounded-lg text-[10px] font-mono">
+                                    app.get('/api/students', handler);
+                                </div>
+                            </div>
+
+                            <!-- Pillar 3: React -->
+                            <div class="bg-slate-50 dark:bg-slate-900/60 p-4 rounded-2xl border-2 border-sky-400/30 hover:border-sky-400 transition-all space-y-3 relative group">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-2xl font-black text-sky-400">R</span>
+                                    <span class="text-[10px] font-mono uppercase bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-300 px-2 py-0.5 rounded font-bold">Frontend UI</span>
+                                </div>
+                                <h4 class="font-bold text-sm text-slate-800 dark:text-slate-100">React.js</h4>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">Component-driven single page application (SPA) using JSX & State Hooks.</p>
+                                <div class="bg-slate-900 text-amber-300 p-2 rounded-lg text-[10px] font-mono">
+                                    const [data, setData] = useState([]);
+                                </div>
+                            </div>
+
+                            <!-- Pillar 4: Node.js -->
+                            <div class="bg-slate-50 dark:bg-slate-900/60 p-4 rounded-2xl border-2 border-emerald-600/30 hover:border-emerald-600 transition-all space-y-3 relative group">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-2xl font-black text-emerald-600">N</span>
+                                    <span class="text-[10px] font-mono uppercase bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded font-bold">Runtime Engine</span>
+                                </div>
+                                <h4 class="font-bold text-sm text-slate-800 dark:text-slate-100">Node.js</h4>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">V8 JavaScript runtime engine with asynchronous event loop execution.</p>
+                                <div class="bg-slate-900 text-emerald-300 p-2 rounded-lg text-[10px] font-mono">
+                                    npm start -> node server.js
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SUBTAB 2: INTERACTIVE REST API TESTER & SIMULATION -->
+                <div id="mernSectionApi" class="space-y-6 hidden">
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        
+                        <!-- Left Controls: API Endpoint Runner (6 Cols) -->
+                        <div class="lg:col-span-6 bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                            <div class="border-b border-slate-100 dark:border-slate-700 pb-3">
+                                <h3 class="font-bold text-slate-800 dark:text-slate-100 text-base flex items-center gap-2">
+                                    <i class="fa-solid fa-bolt text-amber-500"></i> Interactive Express REST API Endpoint Tester
+                                </h3>
+                                <p class="text-xs text-slate-500">Simulate sending HTTP requests to a simulated Express server with MongoDB integration.</p>
+                            </div>
+
+                            <!-- Request Bar -->
+                            <div class="space-y-3">
+                                <div class="flex gap-2">
+                                    <select id="apiMethodSelect" class="bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 dark:text-slate-200 cursor-pointer">
+                                        <option value="GET">GET</option>
+                                        <option value="POST">POST</option>
+                                        <option value="PUT">PUT</option>
+                                        <option value="DELETE">DELETE</option>
+                                    </select>
+                                    <input type="text" id="apiUrlInput" value="http://localhost:5000/api/vignan/students" class="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-mono text-slate-800 dark:text-slate-200">
+                                    <button onclick="executeSimulatedApiCall()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs shadow-md transition-all cursor-pointer">
+                                        Send 🚀
+                                    </button>
+                                </div>
+
+                                <!-- Request JSON Body (for POST/PUT) -->
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">JSON Payload Body (for POST/PUT)</label>
+                                    <textarea id="apiPayloadBody" rows="4" class="w-full bg-slate-900 text-slate-200 font-mono text-xs p-3 rounded-xl border border-slate-700 focus:outline-none">{
+  "name": "M. Rahul",
+  "regNo": "211FA04123",
+  "department": "CSE",
+  "cgpa": 8.92
+}</textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Output: Simulated Response & MongoDB Document State (6 Cols) -->
+                        <div class="lg:col-span-6 bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                            <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
+                                <h3 class="font-bold text-slate-800 dark:text-slate-100 text-base flex items-center gap-2">
+                                    <i class="fa-solid fa-code text-sky-400"></i> Express Response & MongoDB Document Store
+                                </h3>
+                                <span class="text-xs font-mono font-bold text-emerald-500" id="apiStatusCodeTag">200 OK</span>
+                            </div>
+
+                            <!-- Live Output Window -->
+                            <div class="space-y-2">
+                                <span class="text-[11px] font-bold uppercase text-slate-400">Response Headers & Body</span>
+                                <pre id="apiResponseViewer" class="bg-slate-900 text-emerald-400 font-mono text-xs p-4 rounded-xl border border-slate-800 overflow-x-auto max-h-64">{
+  "success": true,
+  "count": 3,
+  "data": [
+    { "_id": "64f1a2b001", "name": "K. Sai Kumar", "regNo": "211FA04000", "department": "CSE", "cgpa": 8.75 },
+    { "_id": "64f1a2b002", "name": "P. Ananya", "regNo": "211FA04005", "department": "CSE", "cgpa": 9.12 }
+  ]
+}</pre>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- SUBTAB 3: REACT INTERACTIVE PLAYGROUND & CONCEPT DEMOS -->
+                <div id="mernSectionReact" class="space-y-6 hidden">
+                    <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm space-y-6">
+                        <div class="border-b border-slate-100 dark:border-slate-700 pb-3">
+                            <h3 class="font-bold text-slate-800 dark:text-slate-100 text-base flex items-center gap-2">
+                                <i class="fa-brands fa-react text-sky-400"></i> Interactive React Mini Component Sandbox
+                            </h3>
+                            <p class="text-xs text-slate-500">Live interactive examples demonstrating core React concepts: State (`useState`), Effects (`useEffect`), and Props handling.</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            
+                            <!-- Demo 1: Counter & State Hook -->
+                            <div class="bg-slate-50 dark:bg-slate-900/60 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <h4 class="font-bold text-sm text-slate-800 dark:text-slate-200">1. State Hook (`useState`) Counter</h4>
+                                    <span class="text-[10px] font-mono bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-300 px-2 py-0.5 rounded font-bold">Interactive</span>
+                                </div>
+                                <div class="flex items-center justify-center gap-4 py-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
+                                    <button onclick="decrementReactCounter()" class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-800 dark:text-white font-black text-lg transition-all cursor-pointer">-</button>
+                                    <div class="text-center">
+                                        <div class="text-3xl font-black text-vignan-600 dark:text-sky-400" id="reactCounterValue">0</div>
+                                        <div class="text-[10px] text-slate-400 font-mono mt-0.5">count state</div>
+                                    </div>
+                                    <button onclick="incrementReactCounter()" class="w-10 h-10 rounded-xl bg-vignan-600 hover:bg-vignan-700 text-white font-black text-lg transition-all cursor-pointer">+</button>
+                                </div>
+                                <div class="bg-slate-900 text-slate-200 p-3 rounded-xl font-mono text-[11px]">
+                                    const [count, setCount] = useState(0);<br>
+                                    &lt;button onClick={() =&gt; setCount(count + 1)}&gt;+&lt;/button&gt;
+                                </div>
+                            </div>
+
+                            <!-- Demo 2: Controlled Input & Data Binding -->
+                            <div class="bg-slate-50 dark:bg-slate-900/60 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <h4 class="font-bold text-sm text-slate-800 dark:text-slate-200">2. Controlled Input Component</h4>
+                                    <span class="text-[10px] font-mono bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded font-bold">Two-Way Data</span>
+                                </div>
+                                <div class="space-y-2 bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+                                    <input type="text" id="reactInputDemo" onkeyup="updateReactInputPreview()" placeholder="Type something..." class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-sky-400">
+                                    <div class="text-xs text-slate-600 dark:text-slate-300 font-semibold">
+                                        Rendered Live: <span id="reactInputPreviewText" class="text-emerald-600 dark:text-emerald-400 font-mono">Hello React!</span>
+                                    </div>
+                                </div>
+                                <div class="bg-slate-900 text-slate-200 p-3 rounded-xl font-mono text-[11px]">
+                                    &lt;input value={text} onChange={(e) =&gt; setText(e.target.value)} /&gt;
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SUBTAB 4: FULL STACK BOILERPLATE CODE GENERATOR -->
+                <div id="mernSectionCode" class="space-y-6 hidden">
+                    <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
+                            <div>
+                                <h3 class="font-bold text-slate-800 dark:text-slate-100 text-base flex items-center gap-2">
+                                    <i class="fa-solid fa-file-code text-purple-500"></i> Complete MERN Full-Stack Starter Snippets
+                                </h3>
+                                <p class="text-xs text-slate-500">Copy ready-to-use production server and React client code snippets</p>
+                            </div>
+                            <button onclick="copyCurrentMernCode()" class="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-900 text-white font-semibold rounded-xl text-xs flex items-center gap-1.5 shadow transition-all cursor-pointer">
+                                <i class="fa-solid fa-copy text-amber-400"></i> Copy Snippet
+                            </button>
+                        </div>
+
+                        <!-- Snippet Selector Tabs -->
+                        <div class="flex items-center gap-2 text-xs font-semibold">
+                            <button onclick="switchMernCodeSnippet('server')" id="snipBtnServer" class="px-3 py-1.5 rounded-lg bg-vignan-600 text-white font-bold cursor-pointer">
+                                Node/Express Server (`server.js`)
+                            </button>
+                            <button onclick="switchMernCodeSnippet('model')" id="snipBtnModel" class="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-200 cursor-pointer">
+                                Mongoose Model (`Student.js`)
+                            </button>
+                            <button onclick="switchMernCodeSnippet('react')" id="snipBtnReact" class="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-200 cursor-pointer">
+                                React Frontend Fetch (`App.jsx`)
+                            </button>
+                        </div>
+
+                        <!-- Code Display Window -->
+                        <pre id="mernCodeViewer" class="bg-slate-900 text-slate-200 font-mono text-xs p-4 rounded-xl border border-slate-800 overflow-x-auto max-h-80 leading-relaxed"></pre>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- TAB 8: AI STUDY ASSISTANT -->
+            <section id="view-assistant" class="space-y-6 hidden">
+                <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-700">
+                        <div>
+                            <span class="text-xs font-bold uppercase tracking-widest text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-1 rounded-md border border-emerald-500/20">
+                                AI Academic Tutor
+                            </span>
+                            <h2 class="text-2xl font-black text-slate-800 dark:text-slate-100 mt-1 flex items-center gap-2">
+                                <i class="fa-solid fa-robot text-emerald-500"></i> B.Tech & MERN AI Assistant
+                            </h2>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Ask any question on Data Structures, MERN Stack, Operating Systems, or Exam preparations.</p>
+                        </div>
+                    </div>
+
+                    <!-- Chat Container -->
+                    <div class="space-y-3">
+                        <div id="aiChatBox" class="bg-slate-50 dark:bg-slate-900/60 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 h-80 overflow-y-auto space-y-3 text-xs">
+                            <div class="flex items-start gap-2.5 bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700 max-w-xl">
+                                <div class="w-7 h-7 rounded-lg bg-emerald-500 text-white flex items-center justify-center font-bold shrink-0">
+                                    <i class="fa-solid fa-robot text-xs"></i>
+                                </div>
+                                <div class="space-y-1">
+                                    <span class="font-bold text-slate-800 dark:text-slate-200">AI Tutor</span>
+                                    <p class="text-slate-600 dark:text-slate-300">
+                                        Hello! I'm your Vignan B.Tech & MERN Stack AI Tutor. Ask me to explain React hooks, write MongoDB Mongoose queries, or simplify OS process scheduling!
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Prompt Input Bar -->
+                        <div class="flex gap-2">
+                            <input type="text" id="aiPromptInput" onkeydown="if(event.key==='Enter') sendAiQuery()" placeholder="e.g., Explain React useEffect hook with a simple code example..." class="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-3 text-xs text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-vignan-500">
+                            <button onclick="sendAiQuery()" class="px-5 py-3 bg-vignan-600 hover:bg-vignan-700 text-white font-bold rounded-xl text-xs shadow-md transition-all cursor-pointer flex items-center gap-1.5">
+                                <i class="fa-solid fa-paper-plane"></i>
+                                <span>Ask AI</span>
+                            </button>
+                        </div>
+
+                        <!-- Quick Shortcut Prompts -->
+                        <div class="flex flex-wrap gap-2 pt-1">
+                            <button onclick="fillAiPrompt('Explain how React useState hook works in full-stack web apps')" class="px-2.5 py-1 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-200 rounded-lg text-[11px] font-medium transition-all cursor-pointer">
+                                ⚛️ Explain React useState Hook
+                            </button>
+                            <button onclick="fillAiPrompt('Write Express JS route code for user CRUD operations')" class="px-2.5 py-1 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-200 rounded-lg text-[11px] font-medium transition-all cursor-pointer">
+                                ⚡ Express CRUD Route Code
+                            </button>
+                            <button onclick="fillAiPrompt('What are the key concepts in Data Structures B.Tech syllabus?')" class="px-2.5 py-1 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-200 rounded-lg text-[11px] font-medium transition-all cursor-pointer">
+                                📚 Core Data Structures Overview
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="mt-auto bg-slate-900 text-slate-400 py-4 text-center text-xs border-t border-slate-800">
+            <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+                <div>
+                    © 2026 Vignan's Foundation for Science, Technology & Research (Deemed to be University), Vadlamudi.
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="text-emerald-400 font-semibold"><i class="fa-brands fa-react mr-1"></i> Powered by MERN Stack</span>
+                </div>
+            </div>
+        </footer>
+
+    </div>
+
+    <script>
+        // Global Application State
+        const state = {
+            currentUser: null,
+            activeTab: 'dashboard',
+            timerMode: 'pomodoro', // pomodoro, shortBreak, longBreak, stopwatch
+            timerDuration: 25 * 60,
+            timerTimeLeft: 25 * 60,
+            timerInterval: null,
+            isTimerRunning: false,
+            todayFocusMins: 75,
+            completedPomos: 3,
+            studySubject: 'Data Structures & Algorithms',
+            activeNoise: null,
+            audioCtx: null,
+            noiseNode: null,
+            tasks: [
+                { id: 1, title: 'Complete DSA Lab Assignment 4 (Binary Search Tree)', subject: 'DSA', dueDate: '2026-10-05', priority: 'HIGH', completed: false },
+                { id: 2, title: 'Build Full-Stack React MERN CRUD Application', subject: 'MERN', dueDate: '2026-10-08', priority: 'HIGH', completed: false },
+                { id: 3, title: 'Revise Operating System Semaphore Memory Lock Notes', subject: 'OS', dueDate: '2026-10-10', priority: 'MEDIUM', completed: true }
+            ],
+            simulatedDb: [
+                { _id: "64f1a2b001", name: "K. Sai Kumar", regNo: "211FA04000", department: "CSE", cgpa: 8.75 },
+                { _id: "64f1a2b002", name: "P. Ananya", regNo: "211FA04005", department: "CSE", cgpa: 9.12 },
+                { _id: "64f1a2b003", name: "V. Karthik", regNo: "211FA04012", department: "CSE", cgpa: 8.40 }
+            ],
+            reactCounter: 0,
+            activeMernCode: 'server'
+        };
+
+        const BOOKS_DATA = [
+            { id: 1, title: 'Data Structures & Algorithms in C++', author: 'Mark Allen Weiss', dept: 'CSE', tag: 'Core Textbook' },
+            { id: 2, title: 'Learning React & Full-Stack MERN Development', author: 'Alex Banks & Eve Porcello', dept: 'CSE', tag: 'MERN Tech' },
+            { id: 3, title: 'Operating System Concepts', author: 'Silberschatz, Galvin, Gagne', dept: 'CSE', tag: 'OS Standard' },
+            { id: 4, title: 'Database System Concepts', author: 'Korth & Sudarshan', dept: 'CSE', tag: 'DBMS Core' },
+            { id: 5, title: 'Microprocessors & Microcontrollers', author: 'Ramesh Gaonkar', dept: 'ECE', tag: 'ECE Core' },
+            { id: 6, title: 'Higher Engineering Mathematics', author: 'B.S. Grewal', dept: 'MATHS', tag: 'Engineering Maths' },
+            { id: 7, title: 'Node.js Design Patterns', author: 'Mario Casciaro', dept: 'CSE', tag: 'Backend Dev' },
+            { id: 8, title: 'Digital Logic & Computer Design', author: 'M. Morris Mano', dept: 'ECE', tag: 'Hardware' }
+        ];
+
+        const MERN_SNIPPETS = {
+            server: `// server.js - Express & Node.js Server Setup
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+
+const app = express();
+app.use(express.json());
+app.use(cors());
+
+// MongoDB Connection
+mongoose.connect('mongodb://localhost:27017/vignan_db')
+  .then(() => console.log('MongoDB Connected to VFSTR Database'))
+  .catch(err => console.error(err));
+
+// Sample Route
+app.use('/api/students', require('./routes/studentRoutes'));
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(\`Server running on port \${PORT}\`));`,
+
+            model: `// models/Student.js - Mongoose Data Schema
+const mongoose = require('mongoose');
+
+const StudentSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  regNo: { type: String, required: true, unique: true },
+  department: { type: String, default: 'CSE' },
+  cgpa: { type: Number, default: 0.0 },
+  createdAt: { type: Date, default: Date.now }
+});
+
+module.exports = mongoose.model('Student', StudentSchema);`,
+
+            react: `// App.jsx - React Frontend Data Fetch Hook Example
+import React, { useState, useEffect } from 'react';
+
+export default function App() {
+  const [students, setStudents] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('http://localhost:5000/api/students')
+      .then(res => res.json())
+      .then(data => {
+        setStudents(data.data);
+        setLoading(false);
+      });
+  }, []);
+
+  return (
+    <div className="p-4">
+      <h2>Vignan Student Directory</h2>
+      {loading ? <p>Loading data...</p> : (
+        <ul>
+          {students.map(s => <li key={s._id}>{s.name} - {s.regNo}</li>)}
+        </ul>
+      )}
+    </div>
+  );
+}`
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            // Check session
+            const savedUser = localStorage.getItem('vfstr_student_user');
+            if (savedUser) {
+                try {
+                    state.currentUser = JSON.parse(savedUser);
+                    initDashboard();
+                } catch(e) {
+                    showLogin();
+                }
+            } else {
+                showLogin();
+            }
+
+            renderTasks();
+            renderBooks();
+            initGpaCalculatorRows();
+            switchMernCodeSnippet('server');
+        });
+
+        function showLogin() {
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('appDashboard').classList.add('hidden');
+        }
+
+        function handleLoginSubmit(event) {
+            event.preventDefault();
+            const name = document.getElementById('loginStudentName').value.trim();
+            const regNo = document.getElementById('loginRegNo').value.trim().toUpperCase();
+            const pass = document.getElementById('loginPassword').value.trim();
+            const dept = document.getElementById('loginDept').value;
+            const sem = document.getElementById('loginSem').value;
+
+            const errBox = document.getElementById('loginErrorMsg');
+
+            if (pass.toUpperCase() !== regNo) {
+                errBox.classList.remove('hidden');
+                document.getElementById('loginErrorText').innerText = "Password must match your Registration Number!";
+                return;
+            }
+
+            errBox.classList.add('hidden');
+
+            state.currentUser = { name, regNo, dept, sem };
+            localStorage.setItem('vfstr_student_user', JSON.stringify(state.currentUser));
+
+            initDashboard();
+            showToast(`Welcome back, ${name}!`);
+        }
+
+        function fillDemoCredentials() {
+            document.getElementById('loginStudentName').value = "K. Sai Kumar";
+            document.getElementById('loginRegNo').value = "211FA04000";
+            document.getElementById('loginPassword').value = "211FA04000";
+            document.getElementById('loginDept').value = "CSE";
+            document.getElementById('loginSem').value = "Sem 5";
+        }
+
+        function togglePasswordVisibility() {
+            const passInput = document.getElementById('loginPassword');
+            const icon = document.getElementById('passToggleIcon');
+            if (passInput.type === 'password') {
+                passInput.type = 'text';
+                icon.className = 'fa-solid fa-eye-slash';
+            } else {
+                passInput.type = 'password';
+                icon.className = 'fa-solid fa-eye';
+            }
+        }
+
+        function initDashboard() {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('appDashboard').classList.remove('hidden');
+
+            document.getElementById('studentNameDisplay').innerText = state.currentUser.name;
+            document.getElementById('regNoDisplay').innerText = `Reg: ${state.currentUser.regNo}`;
+            document.getElementById('departmentSelect').value = state.currentUser.dept;
+            document.getElementById('semesterSelect').value = state.currentUser.sem;
+
+            document.getElementById('dashSemTag').innerText = `B.Tech ${state.currentUser.dept} • ${state.currentUser.sem}`;
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('vfstr_student_user');
+            state.currentUser = null;
+            showLogin();
+            showToast("Logged out successfully");
+        }
+
+        function updateStudentProfileFromHeader() {
+            if (!state.currentUser) return;
+            state.currentUser.dept = document.getElementById('departmentSelect').value;
+            state.currentUser.sem = document.getElementById('semesterSelect').value;
+            localStorage.setItem('vfstr_student_user', JSON.stringify(state.currentUser));
+            document.getElementById('dashSemTag').innerText = `B.Tech ${state.currentUser.dept} • ${state.currentUser.sem}`;
+            showToast("Profile settings updated");
+        }
+
+        function switchTab(tabId) {
+            state.activeTab = tabId;
+            const views = ['dashboard', 'study-clock', 'calendar', 'books', 'tools', 'gate', 'mern', 'assistant'];
+            
+            views.forEach(v => {
+                const el = document.getElementById(`view-${v}`);
+                const tabBtn = document.getElementById(`tab-${v}`);
+                if (v === tabId) {
+                    if(el) el.classList.remove('hidden');
+                    if(tabBtn) {
+                        tabBtn.classList.add('active');
+                        tabBtn.classList.remove('bg-white/10');
+                    }
+                } else {
+                    if(el) el.classList.add('hidden');
+                    if(tabBtn) {
+                        tabBtn.classList.remove('active');
+                        if (v !== 'mern') tabBtn.classList.add('bg-white/10');
+                    }
+                }
+            });
+        }
+
+        function toggleTheme() {
+            document.documentElement.classList.toggle('dark');
+            const icon = document.getElementById('themeIcon');
+            if (document.documentElement.classList.contains('dark')) {
+                icon.className = 'fa-solid fa-sun text-amber-300';
+            } else {
+                icon.className = 'fa-solid fa-moon text-amber-300';
+            }
+        }
+
+        function renderTasks() {
+            const container = document.getElementById('tasksListContainer');
+            const filter = document.getElementById('taskFilterSubject').value;
+
+            let filtered = state.tasks;
+            if (filter !== 'ALL') {
+                filtered = state.tasks.filter(t => t.subject === filter);
+            }
+
+            if (filtered.length === 0) {
+                container.innerHTML = `<div class="col-span-full p-6 text-center text-xs text-slate-400 font-semibold">No pending tasks found for selected filter.</div>`;
+                return;
+            }
+
+            container.innerHTML = filtered.map(t => `
+                <div class="task-card p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border ${t.completed ? 'border-slate-200 opacity-60' : 'border-slate-200 dark:border-slate-700'} flex flex-col justify-between">
+                    <div class="space-y-1.5">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-vignan-100 dark:bg-vignan-800 text-vignan-700 dark:text-vignan-200">${t.subject}</span>
+                            <span class="text-[10px] font-semibold text-slate-400"><i class="fa-solid fa-calendar mr-1"></i>${t.dueDate}</span>
+                        </div>
+                        <h4 class="font-bold text-xs ${t.completed ? 'line-through text-slate-400' : 'text-slate-800 dark:text-slate-100'}">${t.title}</h4>
+                    </div>
+                    <div class="mt-3 pt-2 border-t border-slate-200/60 dark:border-slate-700/60 flex items-center justify-between">
+                        <button onclick="toggleTaskComplete(${t.id})" class="text-xs font-semibold flex items-center gap-1 cursor-pointer ${t.completed ? 'text-emerald-600' : 'text-slate-500 hover:text-vignan-600'}">
+                            <i class="fa-regular ${t.completed ? 'fa-square-check text-emerald-500' : 'fa-square'}"></i>
+                            <span>${t.completed ? 'Completed' : 'Mark Done'}</span>
+                        </button>
+                        <button onclick="deleteTask(${t.id})" class="text-rose-500 hover:text-rose-700 text-xs p-1 cursor-pointer">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleTaskComplete(id) {
+            const task = state.tasks.find(t => t.id === id);
+            if (task) {
+                task.completed = !task.completed;
+                renderTasks();
+            }
+        }
+
+        function deleteTask(id) {
+            state.tasks = state.tasks.filter(t => t.id !== id);
+            renderTasks();
+            showToast("Task deleted");
+        }
+
+        function openAddTaskModal() {
+            showModal(`
+                <div class="space-y-4">
+                    <h3 class="text-lg font-bold text-slate-800 dark:text-white">Add New B.Tech Task</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">Task Title</label>
+                            <input type="text" id="newTaskTitleInput" placeholder="e.g. Read MERN React state hooks" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border rounded-xl text-xs">
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">Subject</label>
+                                <select id="newTaskSubjectSelect" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border rounded-xl text-xs">
+                                    <option value="DSA">DSA</option>
+                                    <option value="MERN">MERN / Web</option>
+                                    <option value="OS">Operating Systems</option>
+                                    <option value="DBMS">DBMS</option>
+                                    <option value="GATE">GATE Prep</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">Due Date</label>
+                                <input type="date" id="newTaskDateInput" value="2026-10-15" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border rounded-xl text-xs">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 pt-2">
+                        <button onclick="saveNewTask()" class="flex-1 py-2 bg-vignan-600 text-white font-bold rounded-xl text-xs">Save Task</button>
+                        <button onclick="closeModal()" class="px-4 py-2 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold rounded-xl text-xs">Cancel</button>
+                    </div>
+                </div>
+            `);
+        }
+
+        function saveNewTask() {
+            const title = document.getElementById('newTaskTitleInput').value.trim();
+            const subject = document.getElementById('newTaskSubjectSelect').value;
+            const dueDate = document.getElementById('newTaskDateInput').value;
+
+            if(!title) return;
+
+            state.tasks.push({
+                id: Date.now(),
+                title,
+                subject,
+                dueDate,
+                priority: 'MEDIUM',
+                completed: false
+            });
+
+            closeModal();
+            renderTasks();
+            showToast("New task added!");
+        }
+
+        function setTimerMode(mode) {
+            state.timerMode = mode;
+            pauseTimer();
+
+            document.querySelectorAll('#timerModePomo, #timerModeShort, #timerModeLong, #timerModeStopwatch').forEach(btn => {
+                btn.className = 'px-4 py-2 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 transition-all cursor-pointer';
+            });
+
+            if (mode === 'pomodoro') {
+                state.timerDuration = 25 * 60;
+                document.getElementById('timerModePomo').className = 'px-4 py-2 rounded-xl text-xs font-bold bg-vignan-600 text-white shadow-sm cursor-pointer';
+                document.getElementById('timerStatusLabel').innerText = 'Focus Mode';
+            } else if (mode === 'shortBreak') {
+                state.timerDuration = 5 * 60;
+                document.getElementById('timerModeShort').className = 'px-4 py-2 rounded-xl text-xs font-bold bg-emerald-600 text-white shadow-sm cursor-pointer';
+                document.getElementById('timerStatusLabel').innerText = 'Short Break';
+            } else if (mode === 'longBreak') {
+                state.timerDuration = 15 * 60;
+                document.getElementById('timerModeLong').className = 'px-4 py-2 rounded-xl text-xs font-bold bg-purple-600 text-white shadow-sm cursor-pointer';
+                document.getElementById('timerStatusLabel').innerText = 'Long Break';
+            } else if (mode === 'stopwatch') {
+                state.timerDuration = 0;
+                document.getElementById('timerModeStopwatch').className = 'px-4 py-2 rounded-xl text-xs font-bold bg-amber-500 text-white shadow-sm cursor-pointer';
+                document.getElementById('timerStatusLabel').innerText = 'Stopwatch Mode';
+            }
+
+            state.timerTimeLeft = state.timerDuration;
+            updateTimerDisplay();
+        }
+
+        function toggleTimer() {
+            if (state.isTimerRunning) {
+                pauseTimer();
+            } else {
+                startTimer();
+            }
+        }
+
+        function startTimer() {
+            state.isTimerRunning = true;
+            document.getElementById('timerToggleText').innerText = 'Pause Session';
+            document.getElementById('timerToggleIcon').className = 'fa-solid fa-pause';
+
+            state.timerInterval = setInterval(() => {
+                if (state.timerMode === 'stopwatch') {
+                    state.timerTimeLeft++;
+                } else {
+                    state.timerTimeLeft--;
+                    if (state.timerTimeLeft <= 0) {
+                        pauseTimer();
+                        playChimeSound();
+                        showToast("Session complete!");
+                        state.completedPomos++;
+                        state.todayFocusMins += 25;
+                        document.getElementById('todayFocusMinsDisplay').innerText = `${state.todayFocusMins} Mins`;
+                        document.getElementById('todayPomoCountDisplay').innerText = `${state.completedPomos} Sessions`;
+                    }
+                }
+                updateTimerDisplay();
+            }, 1000);
+        }
+
+        function pauseTimer() {
+            state.isTimerRunning = false;
+            clearInterval(state.timerInterval);
+            document.getElementById('timerToggleText').innerText = 'Start Session';
+            document.getElementById('timerToggleIcon').className = 'fa-solid fa-play';
+        }
+
+        function resetTimer() {
+            pauseTimer();
+            state.timerTimeLeft = state.timerMode === 'stopwatch' ? 0 : state.timerDuration;
+            updateTimerDisplay();
+        }
+
+        function updateTimerDisplay() {
+            const mins = Math.floor(state.timerTimeLeft / 60);
+            const secs = state.timerTimeLeft % 60;
+            const str = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+            document.getElementById('timerDigitsDisplay').innerText = str;
+
+            // Circle dash animation
+            const circle = document.getElementById('timerProgressCircle');
+            if (circle && state.timerDuration > 0) {
+                const fraction = state.timerTimeLeft / state.timerDuration;
+                const offset = 750 * (1 - fraction);
+                circle.style.strokeDashoffset = offset;
+            }
+        }
+
+        function updateStudySubjectTag() {
+            const subj = document.getElementById('studySubjectSelect').value;
+            state.studySubject = subj;
+            document.getElementById('timerSubjectTag').innerHTML = `<i class="fa-solid fa-book-bookmark"></i> Subject: ${subj}`;
+        }
+
+        function playChimeSound() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+                osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.4);
+                gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.8);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.8);
+            } catch(e) {}
+        }
+
+        // Web Audio Ambient Synthesizer
+        function toggleAmbientNoise(type) {
+            if (state.activeNoise === type) {
+                stopAmbientNoise();
+                document.getElementById('soundStatusLabel').innerText = 'Off';
+                return;
+            }
+
+            stopAmbientNoise();
+            state.activeNoise = type;
+            document.getElementById('soundStatusLabel').innerText = `Active: ${type}`;
+
+            try {
+                state.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const bufferSize = state.audioCtx.sampleRate * 2;
+                const noiseBuffer = state.audioCtx.createBuffer(1, bufferSize, state.audioCtx.sampleRate);
+                const output = noiseBuffer.getChannelData(0);
+
+                for (let i = 0; i < bufferSize; i++) {
+                    output[i] = Math.random() * 2 - 1;
+                }
+
+                const whiteNoise = state.audioCtx.createBufferSource();
+                whiteNoise.buffer = noiseBuffer;
+                whiteNoise.loop = true;
+
+                const filter = state.audioCtx.createBiquadFilter();
+                filter.type = type === 'rain' ? 'lowpass' : (type === 'waves' ? 'bandpass' : 'allpass');
+                filter.frequency.value = type === 'rain' ? 800 : 400;
+
+                const gain = state.audioCtx.createGain();
+                gain.gain.value = 0.05;
+
+                whiteNoise.connect(filter);
+                filter.connect(gain);
+                gain.connect(state.audioCtx.destination);
+
+                whiteNoise.start();
+                state.noiseNode = whiteNoise;
+            } catch(e) {}
+        }
+
+        function stopAmbientNoise() {
+            if (state.noiseNode) {
+                try { state.noiseNode.stop(); } catch(e) {}
+                state.noiseNode = null;
+            }
+            state.activeNoise = null;
+        }
+
+        function filterCalCategory(cat) {
+            document.querySelectorAll('.cal-item').forEach(el => {
+                if (cat === 'ALL' || el.dataset.category === cat) {
+                    el.style.display = 'block';
+                } else {
+                    el.style.display = 'none';
+                }
+            });
+        }
+
+        function renderBooks() {
+            const container = document.getElementById('booksGridContainer');
+            const search = (document.getElementById('bookSearchInput')?.value || '').toLowerCase();
+            const category = document.getElementById('bookCategorySelect')?.value || 'ALL';
+
+            const filtered = BOOKS_DATA.filter(b => {
+                const matchSearch = b.title.toLowerCase().includes(search) || b.author.toLowerCase().includes(search);
+                const matchCat = category === 'ALL' || b.dept === category;
+                return matchSearch && matchCat;
+            });
+
+            container.innerHTML = filtered.map(b => `
+                <div class="book-card p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 flex flex-col justify-between">
+                    <div class="space-y-2">
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300">${b.tag}</span>
+                        <h4 class="font-bold text-xs text-slate-800 dark:text-slate-100 line-clamp-2">${b.title}</h4>
+                        <p class="text-[11px] text-slate-500"><i class="fa-solid fa-pen-nib mr-1"></i>${b.author}</p>
+                    </div>
+                    <button onclick="readBookModal('${b.title}')" class="mt-4 w-full py-2 bg-vignan-600 hover:bg-vignan-700 text-white font-bold rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+                        <i class="fa-solid fa-book-open"></i> Read Digital PDF
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function filterBooks() {
+            renderBooks();
+        }
+
+        function readBookModal(title) {
+            showModal(`
+                <div class="space-y-4 text-center">
+                    <div class="w-16 h-16 rounded-2xl bg-vignan-100 dark:bg-vignan-900 text-vignan-600 dark:text-amber-400 mx-auto flex items-center justify-center text-2xl font-bold">
+                        <i class="fa-solid fa-file-pdf"></i>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-800 dark:text-white">${title}</h3>
+                    <p class="text-xs text-slate-500">Opening VFSTR Digital Library PDF Reader Stream...</p>
+                    <div class="p-4 bg-slate-900 text-emerald-400 rounded-xl text-xs font-mono text-left">
+                        [PDF Stream Initialized]<br>
+                        Page 1 of 482 - Accessing Vignan Campus Network Server...
+                    </div>
+                    <button onclick="closeModal()" class="w-full py-2 bg-slate-200 dark:bg-slate-700 font-bold rounded-xl text-xs">Close Reader</button>
+                </div>
+            `);
+        }
+
+        function initGpaCalculatorRows() {
+            const container = document.getElementById('gpaSubjectRows');
+            const sampleSubjects = [
+                { name: 'Data Structures & Algo', credits: 4, grade: 10 },
+                { name: 'Full-Stack MERN Dev Lab', credits: 3, grade: 10 },
+                { name: 'Operating Systems', credits: 3, grade: 9 },
+                { name: 'Database Systems (DBMS)', credits: 3, grade: 9 },
+                { name: 'Engineering Maths III', credits: 3, grade: 8 }
+            ];
+
+            container.innerHTML = sampleSubjects.map((s, idx) => `
+                <div class="grid grid-cols-12 gap-2 items-center gpa-row">
+                    <input type="text" value="${s.name}" class="col-span-6 px-2.5 py-1.5 bg-slate-50 dark:bg-slate-900 border rounded-xl text-xs font-semibold">
+                    <input type="number" value="${s.credits}" min="1" max="5" class="col-span-3 px-2.5 py-1.5 bg-slate-50 dark:bg-slate-900 border rounded-xl text-xs font-bold text-center gpa-credit-input">
+                    <select class="col-span-3 px-2 py-1.5 bg-slate-50 dark:bg-slate-900 border rounded-xl text-xs font-bold gpa-grade-select">
+                        <option value="10" ${s.grade===10?'selected':''}>S (10)</option>
+                        <option value="9" ${s.grade===9?'selected':''}>A (9)</option>
+                        <option value="8" ${s.grade===8?'selected':''}>B (8)</option>
+                        <option value="7" ${s.grade===7?'selected':''}>C (7)</option>
+                        <option value="6" ${s.grade===6?'selected':''}>D (6)</option>
+                        <option value="0">F (0)</option>
+                    </select>
+                </div>
+            `).join('');
+
+            calculateGpa();
+        }
+
+        function addGpaSubjectRow() {
+            const container = document.getElementById('gpaSubjectRows');
+            const div = document.createElement('div');
+            div.className = 'grid grid-cols-12 gap-2 items-center gpa-row';
+            div.innerHTML = `
+                <input type="text" value="New Elective Subject" class="col-span-6 px-2.5 py-1.5 bg-slate-50 dark:bg-slate-900 border rounded-xl text-xs font-semibold">
+                <input type="number" value="3" min="1" max="5" class="col-span-3 px-2.5 py-1.5 bg-slate-50 dark:bg-slate-900 border rounded-xl text-xs font-bold text-center gpa-credit-input">
+                <select class="col-span-3 px-2 py-1.5 bg-slate-50 dark:bg-slate-900 border rounded-xl text-xs font-bold gpa-grade-select">
+                    <option value="10">S (10)</option>
+                    <option value="9" selected>A (9)</option>
+                    <option value="8">B (8)</option>
+                    <option value="7">C (7)</option>
+                </select>
+            `;
+            container.appendChild(div);
+        }
+
+        function calculateGpa() {
+            const rows = document.querySelectorAll('.gpa-row');
+            let totalCredits = 0;
+            let totalPoints = 0;
+
+            rows.forEach(r => {
+                const credit = parseFloat(r.querySelector('.gpa-credit-input').value) || 0;
+                const grade = parseFloat(r.querySelector('.gpa-grade-select').value) || 0;
+                totalCredits += credit;
+                totalPoints += (credit * grade);
+            });
+
+            const sgpa = totalCredits > 0 ? (totalPoints / totalCredits).toFixed(2) : "0.00";
+            document.getElementById('calculatedGpaDisplay').innerText = `${sgpa} / 10`;
+        }
+
+        function analyzeAttendance() {
+            const total = parseInt(document.getElementById('attTotalInput').value) || 0;
+            const attended = parseInt(document.getElementById('attAttendedInput').value) || 0;
+
+            if (total <= 0) return;
+
+            const currentPct = ((attended / total) * 100).toFixed(2);
+            document.getElementById('attPercentageDisplay').innerText = `${currentPct}%`;
+
+            // Bunk allowance logic for 75% threshold
+            const requiredAttended = 0.75 * total;
+            const extra = attended - requiredAttended;
+
+            const summaryEl = document.getElementById('attSummaryText');
+            if (extra >= 0) {
+                const bableBunks = Math.floor(extra / 0.75);
+                summaryEl.innerText = `Great shape! You can safely miss up to ${bableBunks} upcoming classes and remain above 75%.`;
+            } else {
+                const needed = Math.ceil((0.75 * total - attended) / 0.25);
+                summaryEl.innerText = `Warning! You need to attend the next ${needed} consecutive classes without missing to reach 75%.`;
+            }
+        }
+
+        function setMernSubTab(sub) {
+            ['arch', 'api', 'react', 'code'].forEach(s => {
+                const sec = document.getElementById(`mernSection${s.charAt(0).toUpperCase() + s.slice(1)}`);
+                const btn = document.getElementById(`mernSubTab${s.charAt(0).toUpperCase() + s.slice(1)}`);
+                if (s === sub) {
+                    if (sec) sec.classList.remove('hidden');
+                    if (btn) {
+                        btn.className = 'px-3 py-1.5 rounded-lg bg-emerald-500 text-slate-950 font-bold transition-all cursor-pointer';
+                    }
+                } else {
+                    if (sec) sec.classList.add('hidden');
+                    if (btn) {
+                        btn.className = 'px-3 py-1.5 rounded-lg hover:bg-slate-700 text-slate-300 transition-all cursor-pointer';
+                    }
+                }
+            });
+        }
+
+        function executeSimulatedApiCall() {
+            const method = document.getElementById('apiMethodSelect').value;
+            const viewer = document.getElementById('apiResponseViewer');
+            const statusTag = document.getElementById('apiStatusCodeTag');
+
+            if (method === 'GET') {
+                statusTag.innerText = "200 OK";
+                statusTag.className = "text-xs font-mono font-bold text-emerald-500";
+                viewer.innerText = JSON.stringify({
+                    success: true,
+                    count: state.simulatedDb.length,
+                    data: state.simulatedDb
+                }, null, 2);
+            } else if (method === 'POST') {
+                try {
+                    const payload = JSON.parse(document.getElementById('apiPayloadBody').value);
+                    const newObj = { _id: `64f1a2b00${state.simulatedDb.length + 1}`, ...payload };
+                    state.simulatedDb.push(newObj);
+                    statusTag.innerText = "201 CREATED";
+                    statusTag.className = "text-xs font-mono font-bold text-emerald-400";
+                    viewer.innerText = JSON.stringify({
+                        success: true,
+                        message: "Student Document Created in MongoDB!",
+                        data: newObj
+                    }, null, 2);
+                } catch(e) {
+                    statusTag.innerText = "400 BAD REQUEST";
+                    statusTag.className = "text-xs font-mono font-bold text-rose-500";
+                    viewer.innerText = JSON.stringify({ error: "Invalid JSON Body in Payload" }, null, 2);
+                }
+            } else if (method === 'DELETE') {
+                state.simulatedDb.pop();
+                statusTag.innerText = "200 OK";
+                statusTag.className = "text-xs font-mono font-bold text-amber-400";
+                viewer.innerText = JSON.stringify({
+                    success: true,
+                    message: "Last Student Document Removed from MongoDB Store",
+                    remainingCount: state.simulatedDb.length
+                }, null, 2);
+            } else {
+                statusTag.innerText = "200 OK";
+                viewer.innerText = JSON.stringify({ message: "PUT Update Executed Successfully" }, null, 2);
+            }
+        }
+
+        function incrementReactCounter() {
+            state.reactCounter++;
+            document.getElementById('reactCounterValue').innerText = state.reactCounter;
+        }
+
+        function decrementReactCounter() {
+            state.reactCounter--;
+            document.getElementById('reactCounterValue').innerText = state.reactCounter;
+        }
+
+        function updateReactInputPreview() {
+            const val = document.getElementById('reactInputDemo').value;
+            document.getElementById('reactInputPreviewText').innerText = val || "Hello React!";
+        }
+
+        function switchMernCodeSnippet(key) {
+            state.activeMernCode = key;
+            document.getElementById('mernCodeViewer').innerText = MERN_SNIPPETS[key];
+
+            ['server', 'model', 'react'].forEach(k => {
+                const btn = document.getElementById(`snipBtn${k.charAt(0).toUpperCase() + k.slice(1)}`);
+                if (k === key) {
+                    btn.className = 'px-3 py-1.5 rounded-lg bg-vignan-600 text-white font-bold cursor-pointer';
+                } else {
+                    btn.className = 'px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-200 cursor-pointer';
+                }
+            });
+        }
+
+        function copyCurrentMernCode() {
+            const text = MERN_SNIPPETS[state.activeMernCode];
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            showToast("Snippet copied to clipboard!");
+        }
+
+        async function sendAiQuery() {
+            const input = document.getElementById('aiPromptInput');
+            const query = input.value.trim();
+            if(!query) return;
+
+            const chatBox = document.getElementById('aiChatBox');
+
+            // Append User Question
+            chatBox.innerHTML += `
+                <div class="flex items-start justify-end gap-2 text-xs">
+                    <div class="bg-vignan-600 text-white p-3 rounded-xl max-w-lg">
+                        ${query}
+                    </div>
+                </div>
+            `;
+            input.value = '';
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            // Append Loading Indicator
+            const loadingId = `loading_${Date.now()}`;
+            chatBox.innerHTML += `
+                <div id="${loadingId}" class="flex items-center gap-2 text-slate-400 text-xs py-2">
+                    <i class="fa-solid fa-spinner animate-spin text-emerald-500"></i> Thinking & generating solution...
+                </div>
+            `;
+
+            try {
+                const apiKey = ""; // Canvas runtime injection
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+                const payload = {
+                    contents: [{ parts: [{ text: query }] }],
+                    systemInstruction: {
+                        parts: [{ text: "You are an expert Computer Science Professor and Full-Stack MERN Developer at Vignan University. Provide concise, clear, and encouraging explanations with code snippets where appropriate." }]
+                    }
+                };
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+                const aiResponseText = result.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, I couldn't process that query.";
+
+                const loadEl = document.getElementById(loadingId);
+                if(loadEl) loadEl.remove();
+
+                chatBox.innerHTML += `
+                    <div class="flex items-start gap-2.5 bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700 max-w-xl text-xs">
+                        <div class="w-7 h-7 rounded-lg bg-emerald-500 text-white flex items-center justify-center font-bold shrink-0">
+                            <i class="fa-solid fa-robot text-xs"></i>
+                        </div>
+                        <div class="space-y-1">
+                            <span class="font-bold text-slate-800 dark:text-slate-200">AI Tutor</span>
+                            <div class="text-slate-600 dark:text-slate-300 whitespace-pre-wrap leading-relaxed">${aiResponseText}</div>
+                        </div>
+                    </div>
+                `;
+                chatBox.scrollTop = chatBox.scrollHeight;
+
+            } catch(e) {
+                const loadEl = document.getElementById(loadingId);
+                if(loadEl) loadEl.remove();
+
+                chatBox.innerHTML += `
+                    <div class="p-3 rounded-xl bg-rose-50 text-rose-700 text-xs">
+                        Error connecting to AI Tutor service. Please try again.
+                    </div>
+                `;
+            }
+        }
+
+        function fillAiPrompt(str) {
+            document.getElementById('aiPromptInput').value = str;
+        }
+
+        function startGateQuizDemo() {
+            showModal(`
+                <div class="space-y-4">
+                    <h3 class="text-base font-bold text-slate-800 dark:text-white">GATE & Placement Quick Practice Question</h3>
+                    <div class="p-4 bg-slate-50 dark:bg-slate-900 rounded-xl border text-xs space-y-2">
+                        <p class="font-bold text-slate-800 dark:text-slate-200">Q: In React.js, what is the primary purpose of the useEffect hook?</p>
+                        <div class="space-y-1 pt-1">
+                            <label class="flex items-center gap-2 p-2 bg-white dark:bg-slate-800 rounded-lg border cursor-pointer">
+                                <input type="radio" name="quiz" value="A"> A) Direct DOM manipulation only
+                            </label>
+                            <label class="flex items-center gap-2 p-2 bg-white dark:bg-slate-800 rounded-lg border cursor-pointer">
+                                <input type="radio" name="quiz" value="B"> B) Handling side-effects like data fetching, subscriptions, & manual DOM updates
+                            </label>
+                            <label class="flex items-center gap-2 p-2 bg-white dark:bg-slate-800 rounded-lg border cursor-pointer">
+                                <input type="radio" name="quiz" value="C"> C) Replacing Redux completely
+                            </label>
+                        </div>
+                    </div>
+                    <button onclick="checkQuizAnswer()" class="w-full py-2 bg-vignan-600 text-white font-bold rounded-xl text-xs">Submit Answer</button>
+                </div>
+            `);
+        }
+
+        function checkQuizAnswer() {
+            showToast("Correct! B) Handling side-effects like data fetching.");
+            closeModal();
+        }
+
+        function showModal(htmlContent) {
+            const overlay = document.getElementById('customModalOverlay');
+            const content = document.getElementById('customModalContent');
+            content.innerHTML = htmlContent;
+            overlay.classList.remove('hidden');
+            setTimeout(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeModal() {
+            const overlay = document.getElementById('customModalOverlay');
+            const content = document.getElementById('customModalContent');
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                overlay.classList.add('hidden');
+            }, 200);
+        }
+
+        function showToast(msg) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'bg-slate-900 text-white px-4 py-2.5 rounded-xl shadow-xl text-xs font-semibold border border-slate-700 pointer-events-auto flex items-center gap-2 transition-all transform translate-y-2 opacity-0';
+            toast.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400"></i><span>${msg}</span>`;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
